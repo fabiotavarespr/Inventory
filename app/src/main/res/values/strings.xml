@@ -1,0 +1,54 @@
+<resources>
+    <string name="app_name">Inventário</string>
+
+    <string name="editor_activity_title_new_product">Adicionar Produto</string>
+    <string name="editor_activity_title_edit_product">Editar Produto</string>
+
+    <string name="activity_see_all_products">Visualizar todos os produtos</string>
+
+    <string name="action_delete">Deletar</string>
+    <string name="action_save">Salvar</string>
+
+    <string name="product">Produto</string>
+    <string name="supplier">Fornecedor</string>
+
+    <string name="empty_view_title_text">Inventário vazio</string>
+    <string name="empty_view_subtitle_text">Começe a inserir um produto</string>
+
+    <string name="name_product_error">Nome do produto inválido</string>
+    <string name="discard">Descartar</string>
+
+    <string name="keep_editing">Continue editando</string>
+    <string name="editor_delete_product_successful">Produto deletado</string>
+
+    <string name="editor_delete_product_failed">Erro ao deletar o produto</string>
+    <string name="delete_dialog_msg">Deletar esse produto?</string>
+
+    <string name="delete">Deletar</string>
+    <string name="cancel">Cancelar</string>
+
+    <string name="editor_insert_product_failed">Erro ao savar o produto</string>
+    <string name="editor_insert_product_successful">Produto savo</string>
+
+    <string name="editor_update_product_successful">Produto atualizado</string>
+
+    <string name="editor_update_product_failed">Erro ao atualizar o produto</string>
+    <string name="unsaved_changes_dialog_msg">Descartar suas alterações e sair da edição?</string>
+
+    <string name="buy_msg_confirm">Item foi vendido</string>
+    <string name="no_product_in_stock">Nenhum produto disponível em estoque</string>
+    <string name="toast_out_of_stock_msg">Sem produto em estoque!</string>
+    <string name="error_msg_stock_update">Problema com o valor de atualização da quantidade</string>
+
+    <string name="up_quantity">Quantidade foi incrementada</string>
+    <string name="down_quantity">Quantidade foi decrementada</string>
+
+    <string name="name_product_empty">Nome do produto está vazio</string>
+    <string name="price_empty">Preço está vazio</string>
+    <string name="quantity_empty">Quantidade está vazia</string>
+    <string name="name_supplier_empty">Nome fornecedor está vazio</string>
+    <string name="phone_supplier_invalid">Telefone fornecedor é inválido</string>
+    <string name="permission_denied">Permissão negada!</string>
+
+
+</resources>

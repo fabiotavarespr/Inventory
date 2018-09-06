@@ -11,6 +11,7 @@
 
     <string name="product">Produto</string>
     <string name="supplier">Fornecedor</string>
+    <string name="image">Imagem</string>
 
     <string name="empty_view_title_text">Inventário vazio</string>
     <string name="empty_view_subtitle_text">Começe a inserir um produto</string>
@@ -49,6 +50,13 @@
     <string name="name_supplier_empty">Nome fornecedor está vazio</string>
     <string name="phone_supplier_invalid">Telefone fornecedor é inválido</string>
     <string name="permission_denied">Permissão negada!</string>
+
+    <string name="image_hint">Escolha a imagem…</string>
+    <string name="choose_image">Escolher</string>
+
+    <string name="select_image">Escolha uma imagem</string>
+    <string name="something_wrong">Algo deu errado!</string>
+    <string name="no_picked_image">Você não escolheu uma imagem</string>
 
 
 </resources>

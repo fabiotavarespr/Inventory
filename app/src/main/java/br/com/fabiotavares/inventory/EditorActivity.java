@@ -2,6 +2,7 @@ package br.com.fabiotavares.inventory;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.LoaderManager;
 import android.content.ContentValues;
 import android.content.CursorLoader;
@@ -10,6 +11,8 @@ import android.content.Intent;
 import android.content.Loader;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -23,11 +26,16 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+
 import br.com.fabiotavares.inventory.data.ProductContract;
+import br.com.fabiotavares.inventory.util.ImageHelper;
 
 public class EditorActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<Cursor> {
 
@@ -40,6 +48,10 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
     private EditText phoneSupplierEditText;
     private Uri mCurrentProductUri;
     private boolean mProductHasChanged = false;
+    private byte[] mImageByteArray;
+    private Button mImageButton;
+    private ImageView mProductImageView;
+    private static final int IMAGE_PICKER_CODE = 7;
 
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
         @SuppressLint("ClickableViewAccessibility")
@@ -58,6 +70,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         ImageView orderImageView = findViewById(R.id.image_view_order);
         final ImageView upImageView = findViewById(R.id.image_view_up);
         final ImageView downImageView = findViewById(R.id.image_view_down);
+
+        mProductImageView = (ImageView) findViewById(R.id.product_image);
+        mProductImageView.setVisibility(View.GONE);
 
         if (mCurrentProductUri == null) {
             setTitle(R.string.editor_activity_title_new_product);
@@ -78,6 +93,21 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         quantityProductEditText = findViewById(R.id.edit_text_quantity);
         nameSupplierEditText = findViewById(R.id.edit_text_name_supplie);
         phoneSupplierEditText = findViewById(R.id.edit_text_phone);
+
+        // Setup image upload button
+        mImageButton = (Button) findViewById(R.id.image_upload_button);
+        mImageButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // Create image picker intent
+                // Several helpful answers on here: http://stackoverflow.com/questions/5309190/android-pick-images-from-gallery
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                Intent chooserIntent = Intent.createChooser(intent, getString(R.string.select_image));
+                startActivityForResult(chooserIntent, IMAGE_PICKER_CODE);
+            }
+        });
 
         nameProductEditText.setOnTouchListener(mTouchListener);
         priceProductEditText.setOnTouchListener(mTouchListener);
@@ -154,6 +184,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                 ProductContract.ProductEntry.COLUMN_PRODUTO_NOME,
                 ProductContract.ProductEntry.COLUMN_PRODUTO_PRECO,
                 ProductContract.ProductEntry.COLUMN_PRODUTO_QUANTIDADE,
+                ProductContract.ProductEntry.COLUMN_PRODUTO_IMAGEM,
                 ProductContract.ProductEntry.COLUMN_PRODUTO_FORNECEDOR_NOME,
                 ProductContract.ProductEntry.COLUMN_PRODUTO_FORNECEDOR_TELEFONE};
 
@@ -185,6 +216,16 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             quantityProductEditText.setText(Integer.toString(quantity));
             nameSupplierEditText.setText(nameSupplier);
             phoneSupplierEditText.setText(phoneSupplier);
+
+            mImageByteArray = cursor.getBlob(cursor.getColumnIndex(ProductContract.ProductEntry.COLUMN_PRODUTO_IMAGEM));
+            Bitmap productImage = ImageHelper.convertBlobToBitmap(mImageByteArray);
+
+            if (productImage != null) {
+                mProductImageView.setImageBitmap(productImage);
+                mProductImageView.setVisibility(View.VISIBLE);
+            } else {
+                mProductImageView.setVisibility(View.GONE);
+            }
         }
     }
 
@@ -195,6 +236,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         quantityProductEditText.setText(String.valueOf(0));
         nameSupplierEditText.setText("");
         phoneSupplierEditText.setText("");
+
     }
 
     @Override
@@ -212,6 +254,30 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
                     }
                 };
         showUnsavedChangesDialog(discardButtonClickListener);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == IMAGE_PICKER_CODE && resultCode == Activity.RESULT_OK) {
+            if (data == null) {
+                return;
+            }
+            // Otherwise get image out of data
+            try {
+                final Uri imageUri = data.getData();
+                final InputStream imageStream = getContentResolver().openInputStream(imageUri);
+                final Bitmap selectedImage = BitmapFactory.decodeStream(imageStream);
+                mProductImageView.setImageBitmap(selectedImage);
+                // Temp code to store image
+                mImageByteArray = ImageHelper.convertBitmapToBlob(selectedImage);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+                Toast.makeText(EditorActivity.this, getString(R.string.something_wrong), Toast.LENGTH_LONG).show();
+            }
+        } else if (requestCode == IMAGE_PICKER_CODE) {
+            Toast.makeText(EditorActivity.this, getString(R.string.no_picked_image), Toast.LENGTH_LONG).show();
+        }
     }
 
 
@@ -233,6 +299,7 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
         values.put(ProductContract.ProductEntry.COLUMN_PRODUTO_NOME, nameString);
         values.put(ProductContract.ProductEntry.COLUMN_PRODUTO_FORNECEDOR_NOME, nameSupplierString);
         values.put(ProductContract.ProductEntry.COLUMN_PRODUTO_FORNECEDOR_TELEFONE, phoneSupplierString);
+        values.put(ProductContract.ProductEntry.COLUMN_PRODUTO_IMAGEM, mImageByteArray);
         double price = 0;
         if (!TextUtils.isEmpty(priceString)) {
             price = Double.parseDouble(priceString);
@@ -338,6 +405,9 @@ public class EditorActivity extends AppCompatActivity implements LoaderManager.L
             return false;
         } else if (TextUtils.isEmpty(phoneSupplierString)) {
             Toast.makeText(this, getString(R.string.phone_supplier_invalid), Toast.LENGTH_SHORT).show();
+            return false;
+        } else if (mImageByteArray == null) {
+            Toast.makeText(this, getString(R.string.image_hint), Toast.LENGTH_SHORT).show();
             return false;
         } else {
             return true;
